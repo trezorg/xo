@@ -1,3 +1,4 @@
+import random
 from typing import Optional
 
 import pytest
@@ -21,7 +22,7 @@ def board(size: Optional[int] = None, content: Optional[list[Cell]] = None):
 
 
 blank_3_board = board(size=3)
-diagonal_player_winner_board_size_3 = board(
+left_diagonal_player_winner_board_size_3 = board(
     content=[
         Cell.player,
         Cell.none,
@@ -32,6 +33,19 @@ diagonal_player_winner_board_size_3 = board(
         Cell.none,
         Cell.none,
         Cell.player,
+    ]
+)
+right_diagonal_player_winner_board_size_3 = board(
+    content=[
+        Cell.none,
+        Cell.none,
+        Cell.player,
+        Cell.none,
+        Cell.player,
+        Cell.none,
+        Cell.player,
+        Cell.none,
+        Cell.none,
     ]
 )
 row_player_winner_board_size_3 = board(
@@ -47,6 +61,39 @@ row_player_winner_board_size_3 = board(
         Cell.none,
     ]
 )
+row_one_step_winner_board_size_3 = board(
+    content=[
+        Cell.player,
+        Cell.player,
+        Cell.none,
+        Cell.none,
+        Cell.computer,
+        Cell.none,
+        Cell.computer,
+        Cell.none,
+        Cell.none,
+    ]
+)
+row_one_step_winner_board_size_4 = board(
+    content=[
+        Cell.none,
+        Cell.player,
+        Cell.player,
+        Cell.player,
+        Cell.none,
+        Cell.computer,
+        Cell.none,
+        Cell.none,
+        Cell.none,
+        Cell.none,
+        Cell.computer,
+        Cell.none,
+        Cell.none,
+        Cell.none,
+        Cell.none,
+        Cell.computer,
+    ]
+)
 column_player_winner_board_size_3 = board(
     content=[
         Cell.player,
@@ -58,5 +105,18 @@ column_player_winner_board_size_3 = board(
         Cell.player,
         Cell.none,
         Cell.none,
+    ]
+)
+game_over_no_winner = board(
+    content=[
+        Cell.player,
+        Cell.computer,
+        Cell.player,
+        Cell.computer,
+        Cell.player,
+        Cell.computer,
+        Cell.computer,
+        Cell.player,
+        Cell.computer,
     ]
 )

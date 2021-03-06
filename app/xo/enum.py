@@ -13,6 +13,13 @@ class Cell(IntEnum):
     player = 1
     computer = 2
 
+    def __str__(self):
+        if self == Cell.none:
+            return ' '
+        if self == Cell.player:
+            return 'x'
+        return '0'
+
 
 class Winner(IntEnum):
 
