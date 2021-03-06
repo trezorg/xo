@@ -1,0 +1,10 @@
+[flake8]
+exclude =
+    .git,
+    __pycache__,
+    alembic,
+    tests,
+    *.env
+
+max-complexity = 10
+max-line-length = 120

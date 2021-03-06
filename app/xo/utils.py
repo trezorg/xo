@@ -47,7 +47,10 @@ def moves_generator(size, number: int) -> Motions:
         raise ValueError(f'Board size too small: {size}')
     flatten_size = size * size
     if flatten_size < number:
-        raise ValueError(f"Wrong required motions number. Should be less size * size : {size * size}")
+        raise ValueError(
+            f'Wrong required motions number. '
+            f'Should be less size * size : {size * size}'
+        )
     occupied_cells: set[int] = set()
     cells = islice(moves_iterable(), number)
     for cell in cells:

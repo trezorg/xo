@@ -1,0 +1,48 @@
+version: "3"
+
+services:
+
+  postgresql:
+    image: postgres:latest
+    hostname: postgresql
+    restart: "always"
+    command: "postgres -c wal_level=logical -c wal_keep_segments=0 -c max_replication_slots=8"
+    networks:
+      - xo
+    volumes:
+      - postgresql:${POSTGRES_DATA}
+    ports:
+      - ${POSTGRES_LISTEN_PORT}:${POSTGRES_LISTEN_PORT}
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_DB: ${POSTGRES_DB}
+
+  app:
+    build:
+      context: .
+      args:
+        WITH_DEV_PACKAGES: "yes"
+    image: ${SERVICE_IMAGE}
+    networks:
+      - xo
+    hostname: app
+    restart: "no"
+    command: |
+      bash -c '
+        scripts/wait-services.sh && \
+        alembic upgrade head && \
+        scripts/test.sh -l
+      '
+    depends_on:
+      - postgresql
+    environment:
+      SECRET_KEY: ${SECRET_KEY}
+      POSTGRESQL_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgresql:${POSTGRES_LISTEN_PORT}/${POSTGRES_DB}
+
+networks:
+  xo:
+    driver: bridge
+
+volumes:
+  postgresql:

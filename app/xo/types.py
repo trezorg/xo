@@ -1,6 +1,5 @@
 from typing import (
     Iterable,
-    Literal,
 )
 
 from .enum import Cell
@@ -10,5 +9,5 @@ __all__ = (
     'BoardType',
 )
 
-Motions = Iterable[tuple[int, Literal[Cell.player, Cell.computer]]]
+Motions = Iterable[tuple[int, Cell]]
 BoardType = list[list[Cell]]

@@ -42,7 +42,6 @@ def minimax(board: Board, depth: int = 0, is_max: bool = False) -> int:
     if board.is_full:
         return TIE_SCORE
 
-    # If this maximizer's move
     if is_max:
         best = BEST_PLAYER_SCORE
         for row, column in board.blank_positions:
@@ -53,7 +52,6 @@ def minimax(board: Board, depth: int = 0, is_max: bool = False) -> int:
             board.set(Cell.none, row, column)
         return best
 
-    # If this minimizer's move
     best = BEST_COMPUTER_SCORE
     for row, column in board.blank_positions:
         # Make the move

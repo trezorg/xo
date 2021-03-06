@@ -2,8 +2,8 @@ from collections import defaultdict
 
 import pytest
 
-from app.xo import (
-    Board,
+from app.xo.board import Board
+from app.xo.enum import (
     Cell,
     Winner,
 )
@@ -13,7 +13,8 @@ def test_left_diagonal_board_winner(left_diagonal_player_winner_board_size_3):
     assert left_diagonal_player_winner_board_size_3.winner == Winner.player
 
 
-def test_right_diagonal_board_winner(right_diagonal_player_winner_board_size_3):
+def test_right_diagonal_board_winner(
+        right_diagonal_player_winner_board_size_3):
     assert right_diagonal_player_winner_board_size_3.winner == Winner.player
 
 

@@ -1,4 +1,4 @@
-from app.xo import (
+from app.xo.enum import (
     Cell,
     Winner,
 )
