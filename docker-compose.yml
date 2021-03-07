@@ -34,13 +34,31 @@ services:
         alembic upgrade head && \
         /usr/local/bin/gunicorn -c gunicorn.py main:app
       '
-    ports:
-      - ${APP_PORT}:${APP_PORT}
     depends_on:
       - postgresql
     environment:
       SECRET_KEY: ${SECRET_KEY}
       POSTGRESQL_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgresql:${POSTGRES_LISTEN_PORT}/${POSTGRES_DB}
+
+  nginx:
+    image: nginx
+    hostname: nginx
+    restart: "always"
+    volumes:
+      - ./scripts:/tmp/scripts
+    command: /bin/bash -c "bash /tmp/scripts/subst_nginx.sh;  exec nginx -g 'daemon off;'"
+    networks:
+      - xo
+    ports:
+      - ${APP_PORT}:${APP_PORT}
+    depends_on:
+      - app
+    environment:
+      ROOT: /var/app
+      PORT: 8080
+      HOST: _
+      BACKEND: app
+      BACKEND_PORT: 8080
 
 networks:
   xo:
