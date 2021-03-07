@@ -4,3 +4,4 @@
 .pytest_cache
 .dockerignore
 docker-compose*
+.coverage

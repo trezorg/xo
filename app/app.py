@@ -9,7 +9,7 @@ from flask_jwt import JWT
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from .exceptions import BadRequest
+from .exceptions import XOExceptions
 from .services.user.login import (
     authenticate,
     identity,
@@ -18,8 +18,9 @@ from .utils import random_string
 from .views import (
     handle_400_request,
     handle_404_error,
-    handle_bad_request,
+    handle_exception_request,
     handle_server_error,
+    move,
     signin,
     signup,
     start,
@@ -73,12 +74,13 @@ def create_app():
 
     app.config['swagger'] = swagger
     app.errorhandler(400)(handle_400_request)
-    app.errorhandler(BadRequest)(handle_bad_request)
+    app.errorhandler(XOExceptions)(handle_exception_request)
     app.errorhandler(500)(handle_server_error)
     app.errorhandler(404)(handle_404_error)
     app.route('/signup', methods=['POST'])(signup)
     app.route('/signin', methods=['POST'])(signin)
     app.route('/start', methods=['POST'])(start)
+    app.route('/move', methods=['POST'])(move)
 
     jwt = JWT(app, authenticate, identity)
     app.config['jwt'] = jwt

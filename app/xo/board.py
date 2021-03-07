@@ -11,6 +11,7 @@ from .utils import (
 )
 from .types import (
     BoardType,
+    GameMoves,
     Moves,
 )
 
@@ -40,6 +41,9 @@ class Board:
         :return: None
         """
         self._board[row][column] = cell
+
+    def is_free_cell(self, row, column: int) -> bool:
+        return self._board[row][column] == Cell.none
 
     @property
     def cells(self) -> BoardType:
@@ -104,7 +108,7 @@ class Board:
         """
         Create board from list of cells(moves)
         :param data: List of moves
-        :return: Game board
+        :return: Board. Game board
         """
         size = math.sqrt(len(data))
         if not size.is_integer():
@@ -117,21 +121,35 @@ class Board:
         return board
 
     @classmethod
-    def from_storage(cls, size: int, motions: Moves) -> 'Board':
+    def from_moves(cls, size: int, moves: Moves) -> 'Board':
         """
         Construct board from current game movies.
-        We need this function to convert storage output to python board structure.
+        We need this function to convert list of moves to python board structure.
         :param size: Size of a board
-        :param motions: Iterable consists of tuples with 2 elements.
+        :param moves: Iterable consists of tuples with 2 elements.
         First positions in tuple is flatten position in board as row * size + column
         Second is an initiator of the move [Cell.player, Cell.computer]
         :return: Game board
         """
         cells = [Cell.none for _ in range(size * size)]
-        for move in motions:
+        for move in moves:
             position, initiator = move
             cells[position] = Cell(initiator)
         return cls.create(cells)
+
+    @classmethod
+    def from_storage(cls, size: int, moves: GameMoves) -> 'Board':
+        """
+        Construct board from db records.
+        We need this function to convert storage output to python board structure.
+        :param size: Size of a board
+        :param moves: Iterable consists of db move records.
+        :return: Board. Game board
+        """
+        board = cls(size)
+        for move in moves:
+            board.set(Cell(move.player), move.row, move.column)
+        return board
 
     @classmethod
     def random_board(cls, size, number: int):
@@ -141,7 +159,7 @@ class Board:
         :param number: Number of moves
         :return: Game board
         """
-        return cls.from_storage(size, moves_generator(size, number))
+        return cls.from_moves(size, moves_generator(size, number))
 
     def _check_rows(self) -> Winner:
         """

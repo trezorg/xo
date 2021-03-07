@@ -1,6 +1,7 @@
 __all__ = (
     'auth_schema',
     'start_game_schema',
+    'move_schema',
 )
 
 MAX_BOARD_SIZE = 10
@@ -26,4 +27,22 @@ start_game_schema = {
         },
     },
     'required': ['size']
+}
+
+move_schema = {
+    'type': 'object',
+    'properties': {
+        'row': {
+            'type': 'integer',
+            'default': 3,
+        },
+        'column': {
+            'type': 'integer',
+            'default': 3,
+        },
+        'game_id': {
+            'default': 3,
+        },
+    },
+    'required': ['row', 'column', 'game_id']
 }

@@ -1,7 +1,5 @@
-XO game
+XO game server
 ======================
-
-**Xo game server/client application**
 
 **Swagger**: http://127.0.0.1:8080/apidocs
 

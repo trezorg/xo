@@ -127,8 +127,7 @@ def find_first_move(board: Board) -> tuple[int, int]:
     """
     if board.is_over:
         return -1, -1
-    for row, column in board.free_positions:
-        return row, column
+    return next(board.free_positions)
 
 
 def find_random_move(board: Board) -> tuple[int, int]:

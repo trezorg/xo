@@ -3,72 +3,33 @@ parameters:
     in: body
     required: true
     schema:
-        $ref: '#/definitions/StartGameBody'
+        $ref: '#/definitions/MoveRequest'
 security:
     - APIKeyHeader: ['Authorization']
 definitions:
-    GameMove:
+    MoveRequest:
         type: object
         required:
             - row
             - column
-            - player
-            - order
-            - created_at
+            - game_id
         properties:
             row:
                 type: integer
             column:
                 type: integer
-            player:
-                type: integer
-                enum: [1, 2]
-            order:
-                type: integer
-            created_at:
-                type: string
-                format: date-time
-    GameResponse:
-        type: object
-        required:
-            - game_id
-            - user_id
-            - size
-            - winner
-            - created_at
-            - finished_at
-            - moves
-        properties:
             game_id:
                 type: integer
-            user_id:
-                type: integer
-            size:
-                type: integer
-            winner:
-                type: integer
-                enum: [ 1, 2 ]
-            created_at:
-                type: string
-                format: date-time
-            finished_at:
-                type: string
-                format: date-time
-            moves:
-                type: array
-                items:
-                    $ref: '#/definitions/GameMove'
-    StartGameBody:
+    MoveResponse:
         type: object
-        id: StartGameBody
         required:
-            - size
+            - row
+            - column
         properties:
-            size:
-                type: int
-                example: 3
-                minimum: 3
-                maximum: 10
+            row:
+                type: integer
+            column:
+                type: integer
     Error:
         type: object
         required:
@@ -84,7 +45,7 @@ definitions:
                 example: Bad request
             description:
                 type: string
-                example: Size is not valid value
+                example: 'Row is over the board boundary'
     AuthError:
         type: object
         required:
@@ -116,15 +77,16 @@ definitions:
                 example: Server error
             description:
                 type: string
-                example: Cannot create game
+                example: Cannot cre
 
 responses:
     201:
-        description: Game info
+        description: Game computer move
         schema:
-            $ref: '#/definitions/GameResponse'
+            $ref: '#/definitions/MoveResponse'
         examples:
-            access_token: 'token'
+            row: 1
+            column: 1
     400:
         description: Bad request
         schema:
@@ -132,7 +94,7 @@ responses:
         examples:
             status_code: 400
             error: 'Bad request'
-            description: 'Size is not valid value'
+            description: 'Row is over the board boundary'
     401:
         description: Authorization Required
         schema:
@@ -148,4 +110,4 @@ responses:
         examples:
             status_code: 500
             error: 'Server error'
-            description: 'Cannot create game'
+            description: 'Cannot process the move'

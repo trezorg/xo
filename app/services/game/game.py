@@ -1,4 +1,5 @@
 import random
+from datetime import datetime
 from typing import (
     Callable,
     Tuple,
@@ -10,7 +11,11 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from ...constant import DEFAULT_GAME_SIZE
-from ...exceptions import ServerError
+from ...exceptions import (
+    BadRequest,
+    OccupiedCell,
+    GameIsOver,
+)
 from ...models.models import (
     Game,
     Move,
@@ -18,7 +23,9 @@ from ...models.models import (
 )
 from ...models.session import session_scope
 from ...xo.enum import (
+    Cell,
     Player,
+    Winner,
 )
 from ...xo.board import Board
 from ...xo.types import (
@@ -33,8 +40,9 @@ from ...xo.xo import (
 
 __all__ = (
     'start_game',
-    'make_move',
+    'store_move',
     'get_moves',
+    'delete_game',
 )
 
 MINIMAX_MIN_FREE_CELLS = 9
@@ -72,7 +80,7 @@ def start_game(app: Flask, user: User, size: int = DEFAULT_GAME_SIZE) -> Tuple[X
         if computer_started:
             row, column = strategy(board)(board)
             position = row * size + column
-            make_move(session, game_id=game.id, position=position, player=Player.computer)
+            store_move(session, game_id=game.id, position=position, player=Player.computer)
         moves = get_moves(session, game_id=game.id, size=size)
         board_game = XOGame(
             id=game.id,
@@ -82,15 +90,11 @@ def start_game(app: Flask, user: User, size: int = DEFAULT_GAME_SIZE) -> Tuple[X
             finished_at=game.finished_at,
             user_id=game.user_id,
         )
-        try:
-            session.commit()
-        except SQLAlchemyError as err:
-            raise ServerError('Cannot start game') from err
     return board_game, moves
 
 
-def make_move(session: Session, game_id, position: int,
-              player: Player, flush=False, commit=False) -> None:
+def store_move(session: Session, game_id, position: int,
+               player: Player, flush=False, commit=False) -> None:
     """
     Create move db record
     :param session: Session. SQLAlchemy session
@@ -130,3 +134,61 @@ def get_moves(session: Session, game_id, size: int) -> GameMoves:
             column=column,
             created_at=move.created_at
         )
+
+
+def make_move(app: Flask, user: User, game_id, row, column: int) -> Tuple[int, int]:
+    """
+    Make player move
+    :param app: Flask. Application
+    :param user: User. Game user
+    :param game_id: int. Game_id
+    :param row: int. Board row
+    :param column: int. Board column
+    :return: tuple[int, int]. Computer turn
+    """
+    ses = app.config['session']
+    with session_scope(ses) as session:
+        game = session.query(Game).filter(Game.user_id == user.id, Game.id == game_id).first()
+        if game is None:
+            raise BadRequest('You do not own this game')
+        if row >= game.size:
+            raise BadRequest('Row is over the board boundary')
+        if column >= game.size:
+            raise BadRequest('Column is over the board boundary')
+        moves = get_moves(session, game_id, game.size)
+        board = Board.from_storage(game.size, moves)
+        if board.is_over:
+            raise GameIsOver('Game is over')
+        if not board.is_free_cell(row, column):
+            raise OccupiedCell()
+        store_move(session, game_id, row * game.size + column, Player.player)
+        board.set(Cell(Player.player.value), row, column)
+        if board.is_over:
+            game.winner = None if board.winner == Winner.none else board.winner
+            game.finished_at = datetime.utcnow()
+            session.add(game)
+            return -1, -1
+        computer_move_row, computer_move_column = strategy(board)(board)
+        store_move(
+            session,
+            game_id,
+            computer_move_row * game.size + computer_move_column,
+            Player.computer,
+        )
+        return computer_move_row, computer_move_column
+
+
+def delete_game(app: Flask, game_id: int):
+    """
+    Delete the game
+    :param app: Flask. Application
+    :param game_id: int. Game id
+    :return:
+    """
+    ses = app.config['session']
+    with session_scope(ses) as session:
+        session.query(Game).filter(Game.id == game_id).delete()
+        try:
+            session.commit()
+        except SQLAlchemyError as err:
+            raise BadRequest('Cannot delete game') from err

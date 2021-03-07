@@ -16,8 +16,12 @@ from jsonschema import ValidationError
 from .schemas.validation import (
     auth_schema,
     start_game_schema,
+    move_schema,
 )
-from .services.game.game import start_game
+from .services.game.game import (
+    make_move,
+    start_game,
+)
 from .services.game.utils import game_board_response
 from .services.user.login import (
     authenticate,
@@ -47,7 +51,7 @@ def handle_400_request(error):
     return make_response(jsonify(error_dict), error.status_code)
 
 
-def handle_bad_request(error):
+def handle_exception_request(error):
     return make_response(jsonify(error.to_dict()), error.status_code)
 
 
@@ -94,4 +98,19 @@ def start():
     size = g.data['size']
     game, moves = start_game(current_app, current_identity, size)
     response = game_board_response(game, moves)
+    return make_response(jsonify(response), 201)
+
+
+@jwt_required()
+@expects_json(move_schema)
+@swag_from('swagger/move.yaml')
+def move():
+    row = g.data['row']
+    column = g.data['column']
+    game_id = g.data['game_id']
+    row, column = make_move(current_app, current_identity, game_id=game_id, row=row, column=column)
+    response = {
+        'row': row,
+        'column': column,
+    }
     return make_response(jsonify(response), 201)

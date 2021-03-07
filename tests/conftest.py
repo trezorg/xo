@@ -1,14 +1,20 @@
 import string
 from typing import (
     Optional,
-    Union,
 )
 
 import pytest
 from flask import url_for
 
 from app.app import create_app
-from app.models.models import User
+from app.models.models import (
+    Game,
+    User,
+)
+from app.services.game.game import (
+    delete_game,
+    start_game,
+)
 from app.services.user.login import (
     delete_user,
     signup_user,
@@ -50,6 +56,13 @@ def db_user(app, str_generator) -> User:
 
 
 @pytest.fixture
+def db_game(app, db_user) -> Game:
+    game, movies = start_game(app, db_user, 3)
+    yield game, movies
+    delete_game(app, game.id)
+
+
+@pytest.fixture
 def signup_url():
     return url_for('signup')
 
@@ -62,6 +75,11 @@ def signin_url():
 @pytest.fixture
 def start_game_url():
     return url_for('start')
+
+
+@pytest.fixture
+def move_url():
+    return url_for('move')
 
 
 @pytest.fixture

@@ -25,7 +25,7 @@ migration:
 	POSTGRESQL_URL=$(POSTGRESQL_URL) pipenv run alembic upgrade head
 
 test-local: postgresql-migration
-	POSTGRESQL_URL=$(POSTGRESQL_URL) pipenv run pytest -v
+	POSTGRESQL_URL=$(POSTGRESQL_URL) pipenv run scripts/test.sh -l
 
 test-docker: stop
 	scripts/docker-compose-test.sh

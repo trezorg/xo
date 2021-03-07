@@ -41,7 +41,7 @@ function lint() {
 }
 
 function testing() {
-    pytest tests/ --color=yes --cov-report term --cov "${@}" | tee "${COVERAGE_REPORT_FILE}"
+    pytest --color=yes --cov-report term --cov "${@}" | tee "${COVERAGE_REPORT_FILE}"
     total=$(awk '/TOTAL/ { gsub("%", ""); print $4 }' < "${COVERAGE_REPORT_FILE}")
     total=$((total+0))
     if [[ ${total} -lt ${COVERAGE_LIMIT} ]]; then
