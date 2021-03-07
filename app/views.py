@@ -68,7 +68,7 @@ def handle_404_error(error):
 
 
 @expects_json(auth_schema)
-@swag_from('schemas/signup.yaml')
+@swag_from('swagger/signup.yaml')
 def signup():
     data = g.data
     signup_user(current_app, data['username'], data['password'])
@@ -76,7 +76,7 @@ def signup():
 
 
 @expects_json(auth_schema)
-@swag_from('schemas/signin.yaml')
+@swag_from('swagger/signin.yaml')
 def signin():
     data = g.data
     user = authenticate(data['username'], data['password'])
@@ -89,7 +89,7 @@ def signin():
 
 @jwt_required()
 @expects_json(start_game_schema)
-@swag_from('schemas/start.yaml')
+@swag_from('swagger/start.yaml')
 def start():
     size = g.data['size']
     game, moves = start_game(current_app, current_identity, size)
