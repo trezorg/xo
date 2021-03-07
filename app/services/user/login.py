@@ -22,7 +22,7 @@ __all__ = (
 )
 
 
-def signup_user(app: Flask, username, password: str):
+def signup_user(app: Flask, username, password: str) -> User:
     hashed = pbkdf2_sha256.hash(password)
     ses = app.config['session']
     with session_scope(ses) as session:
@@ -32,6 +32,7 @@ def signup_user(app: Flask, username, password: str):
             session.commit()
         except IntegrityError as err:
             raise BadRequest('Login already exists') from err
+    return user
 
 
 def delete_user(app: Flask, username: str):

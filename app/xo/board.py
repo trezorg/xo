@@ -11,7 +11,7 @@ from .utils import (
 )
 from .types import (
     BoardType,
-    Motions,
+    Moves,
 )
 
 
@@ -58,7 +58,21 @@ class Board:
         return True
 
     @property
-    def blank_positions(self) -> Iterator[tuple[int, int]]:
+    def free_positions_count(self) -> int:
+        """
+        Return number of board free positions
+        :return: int
+        """
+        count = 0
+        for row in range(self.size):
+            for column in range(self.size):
+                cell = self._board[row][column]
+                if cell is Cell.none:
+                    count += 1
+        return count
+
+    @property
+    def free_positions(self) -> Iterator[tuple[int, int]]:
         """
         Return iterator over blank board cell positions
         :return: Iterator of blank cells
@@ -103,13 +117,13 @@ class Board:
         return board
 
     @classmethod
-    def from_storage(cls, size: int, motions: Motions) -> 'Board':
+    def from_storage(cls, size: int, motions: Moves) -> 'Board':
         """
         Construct board from current game movies.
         We need this function to convert storage output to python board structure.
         :param size: Size of a board
         :param motions: Iterable consists of tuples with 2 elements.
-        First positions in tuple is flatten position in board as row + column * size
+        First positions in tuple is flatten position in board as row * size + column
         Second is an initiator of the move [Cell.player, Cell.computer]
         :return: Game board
         """

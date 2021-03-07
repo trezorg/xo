@@ -13,7 +13,7 @@ __all__ = (
 
 from .enum import Cell
 from .types import (
-    Motions,
+    Moves,
 )
 
 
@@ -42,7 +42,7 @@ def moves_iterable() -> Iterable[Cell]:
         yield cell_moves[move_index % 2]
 
 
-def moves_generator(size, number: int) -> Motions:
+def moves_generator(size, number: int) -> Moves:
     if size < 2:
         raise ValueError(f'Board size too small: {size}')
     flatten_size = size * size

@@ -12,6 +12,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import ENUM
 
 from .base import Base
+from ..constant import DEFAULT_GAME_SIZE
 from ..xo.enum import Player
 
 
@@ -37,7 +38,8 @@ class Game(Base):
     user_id = Column(Integer, ForeignKey('user.id', ondelete="CASCADE"), nullable=False)
     created_at = Column(DateTime(timezone=True), default=func.now(), nullable=False)
     finished_at = Column(DateTime(timezone=True), nullable=True, default=None)
-    winner = Column('winner', ENUM(Player, name='player_enum'), nullable=False)
+    winner = Column('winner', ENUM(Player, name='player_enum'), nullable=True)
+    size = Column(Integer, nullable=False, default=DEFAULT_GAME_SIZE)
     user = relationship("User", back_populates="games")
     moves = relationship("Move", back_populates="game")
 

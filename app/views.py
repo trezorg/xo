@@ -7,12 +7,18 @@ from flask import (
     make_response,
 )
 from flask_expects_json import expects_json
+from flask_jwt import (
+    current_identity,
+    jwt_required,
+)
 from jsonschema import ValidationError
 
-from .schemas.signup import (
+from .schemas.validation import (
     auth_schema,
-    # start_game_schema,
+    start_game_schema,
 )
+from .services.game.game import start_game
+from .services.game.utils import game_board_response
 from .services.user.login import (
     authenticate,
     signup_user,
@@ -66,7 +72,7 @@ def handle_404_error(error):
 def signup():
     data = g.data
     signup_user(current_app, data['username'], data['password'])
-    return jsonify({'success': 'ok'})
+    return make_response(jsonify({'success': 'ok'}), 201)
 
 
 @expects_json(auth_schema)
@@ -81,15 +87,11 @@ def signin():
     return resp
 
 
-'''
+@jwt_required()
 @expects_json(start_game_schema)
-@swag_from('schemas/signin.yaml')
+@swag_from('schemas/start.yaml')
 def start():
     size = g.data['size']
-    user = authenticate(data['username'], data['password'])
-    jwt = current_app.config['jwt']
-    access_token = jwt.jwt_encode_callback(user)
-    resp = make_response(jsonify({"access_token": access_token.decode('utf-8')}), 200)
-    resp.headers.extend({'jwt-token': access_token})
-    return resp
-'''
+    game, moves = start_game(current_app, current_identity, size)
+    response = game_board_response(game, moves)
+    return make_response(jsonify(response), 201)

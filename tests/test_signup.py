@@ -18,10 +18,9 @@ def test_signup_bad_request_no_password(client, signup_url):
 
 
 def test_signup_existing_login(client, signup_url, db_user):
-    username, password = db_user
     data = {
-        'username': username,
-        'password': password,
+        'username': db_user.login,
+        'password': db_user.password,
     }
     response = client.post(
         signup_url,
@@ -44,5 +43,5 @@ def test_signup(client, signup_url, str_generator):
         content_type='application/json'
     )
     payload = response.json
-    assert response.status_code == 200, payload
+    assert response.status_code == 201, payload
     assert 'success' in payload, payload

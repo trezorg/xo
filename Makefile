@@ -35,4 +35,7 @@ run-local: postgresql-migration
 
 run-docker: start
 
-.PHONY: pipenv start stop postgresql test-local test-docker run-local run-docker migration postgresql-migration
+lint:
+	pipenv run bash -c 'flake8 && mypy .'
+
+.PHONY: pipenv lint start stop postgresql test-local test-docker run-local run-docker migration postgresql-migration

@@ -1,3 +1,5 @@
+import random
+
 from .constants import (
     BEST_COMPUTER_SCORE,
     BEST_PLAYER_SCORE,
@@ -14,8 +16,10 @@ from .board import Board
 
 __all__ = (
     'minimax',
-    'find_best_computer_move',
-    'find_best_player_move',
+    'find_minimax_computer_move',
+    'find_minimax_player_move',
+    'find_first_move',
+    'find_random_move',
 )
 
 
@@ -44,7 +48,8 @@ def minimax(board: Board, depth: int = 0, is_max: bool = False) -> int:
 
     if is_max:
         best = BEST_PLAYER_SCORE
-        for row, column in board.blank_positions:
+
+        for row, column in board.free_positions:
             # Make the move
             board.set(Cell.player, row, column)
             # Call minimax recursively and choose the maximum value
@@ -53,7 +58,7 @@ def minimax(board: Board, depth: int = 0, is_max: bool = False) -> int:
         return best
 
     best = BEST_COMPUTER_SCORE
-    for row, column in board.blank_positions:
+    for row, column in board.free_positions:
         # Make the move
         board.set(Cell.computer, row, column)
         # Call minimax recursively and choose the minimum value
@@ -62,16 +67,16 @@ def minimax(board: Board, depth: int = 0, is_max: bool = False) -> int:
     return best
 
 
-def find_best_computer_move(board: Board) -> tuple[int, int]:
+def find_minimax_computer_move(board: Board) -> tuple[int, int]:
     """
     Find best move for the computer
-    :param board:
-    :return: Move as 2-sized tuple
+    :param board: Board. Game board
+    :return: tuple[int, int]. Move as 2-sized tuple
     """
     best = BEST_COMPUTER_SCORE
     best_move = -1, -1
 
-    for row, column in board.blank_positions:
+    for row, column in board.free_positions:
         # Make the move
         board.set(Cell.computer, row, column)
 
@@ -88,16 +93,16 @@ def find_best_computer_move(board: Board) -> tuple[int, int]:
     return best_move
 
 
-def find_best_player_move(board: Board) -> tuple[int, int]:
+def find_minimax_player_move(board: Board) -> tuple[int, int]:
     """
     Find best move for the player
-    :param board:
-    :return: Move as 2-sized tuple
+    :param board: Board. Game board
+    :return: tuple[int, int]. Move as 2-sized tuple
     """
     best = BEST_PLAYER_SCORE
     best_move = -1, -1
 
-    for row, column in board.blank_positions:
+    for row, column in board.free_positions:
         # Make the move
         board.set(Cell.player, row, column)
 
@@ -112,3 +117,26 @@ def find_best_player_move(board: Board) -> tuple[int, int]:
             best = move
 
     return best_move
+
+
+def find_first_move(board: Board) -> tuple[int, int]:
+    """
+    Find first free cell
+    :param board:
+    :return: tuple[int, int]. Move as 2-sized tuple
+    """
+    if board.is_over:
+        return -1, -1
+    for row, column in board.free_positions:
+        return row, column
+
+
+def find_random_move(board: Board) -> tuple[int, int]:
+    """
+    Find random free cell
+    :param board:
+    :return: tuple[int, int]. Move as 2-sized tuple
+    """
+    if board.is_over:
+        return -1, -1
+    return random.choice(list(board.free_positions))

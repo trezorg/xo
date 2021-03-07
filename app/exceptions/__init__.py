@@ -1,12 +1,13 @@
 
 __all__ = (
     'BadRequest',
+    'ServerError',
 )
 
 
-class BadRequest(Exception):
+class XOExceptions(Exception):
 
-    status_code = 400
+    status_code: int = -1
 
     def __init__(self, message, status_code=None, payload=None):
         super().__init__(self)
@@ -22,3 +23,13 @@ class BadRequest(Exception):
         if 'description' not in rv:
             rv['description'] = ''
         return rv
+
+
+class BadRequest(XOExceptions):
+
+    status_code = 400
+
+
+class ServerError(XOExceptions):
+
+    status_code = 500

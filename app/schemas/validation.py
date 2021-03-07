@@ -3,6 +3,9 @@ __all__ = (
     'start_game_schema',
 )
 
+MAX_BOARD_SIZE = 10
+MIN_BOARD_SIZE = 3
+
 auth_schema = {
     'type': 'object',
     'properties': {
@@ -18,6 +21,8 @@ start_game_schema = {
         'size': {
             'type': 'integer',
             'default': 3,
+            'minimum': MIN_BOARD_SIZE,
+            'maximum': MAX_BOARD_SIZE,
         },
     },
     'required': ['size']

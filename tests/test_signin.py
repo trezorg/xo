@@ -18,10 +18,9 @@ def test_signin_bad_request_no_password(client, signin_url):
 
 
 def test_signin_wrong_password(client, signin_url, db_user):
-    username, password = db_user
     data = {
-        'username': username,
-        'password': password + 'x',
+        'username': db_user.login,
+        'password': db_user.password + 'x',
     }
     response = client.post(
         signin_url,
@@ -34,10 +33,9 @@ def test_signin_wrong_password(client, signin_url, db_user):
 
 
 def test_signin(client, signin_url, db_user):
-    username, password = db_user
     data = {
-        'username': username,
-        'password': password,
+        'username': db_user.login,
+        'password': db_user.password,
     }
     response = client.post(
         signin_url,

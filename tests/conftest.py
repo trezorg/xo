@@ -1,11 +1,14 @@
-import random
 import string
-from typing import Optional
+from typing import (
+    Optional,
+    Union,
+)
 
 import pytest
 from flask import url_for
 
 from app.app import create_app
+from app.models.models import User
 from app.services.user.login import (
     delete_user,
     signup_user,
@@ -37,11 +40,12 @@ def app():
 
 
 @pytest.fixture
-def db_user(app, str_generator):
+def db_user(app, str_generator) -> User:
     username = next(str_generator)
     password = next(str_generator)
-    signup_user(app, username, password)
-    yield username, password
+    user = signup_user(app, username, password)
+    user.password = password
+    yield user
     delete_user(app, username)
 
 
@@ -53,6 +57,18 @@ def signup_url():
 @pytest.fixture
 def signin_url():
     return url_for('signin')
+
+
+@pytest.fixture
+def start_game_url():
+    return url_for('start')
+
+
+@pytest.fixture
+def auth_header(db_user, app):
+    jwt = app.config['jwt']
+    access_token = jwt.jwt_encode_callback(db_user)
+    return {'Authorization': f'Bearer {access_token.decode("utf-8")}'}
 
 
 def board(size: Optional[int] = None, content: Optional[list[Cell]] = None):

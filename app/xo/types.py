@@ -1,13 +1,45 @@
+from dataclasses import dataclass
+from datetime import datetime
 from typing import (
     Iterable,
+    NewType,
+    Optional,
 )
 
-from .enum import Cell
+from .enum import (
+    Cell,
+    Player,
+)
 
 __all__ = (
-    'Motions',
+    'Moves',
     'BoardType',
+    'GameMove',
+    'GameMoves',
+    'XOGame',
 )
 
-Motions = Iterable[tuple[int, Cell]]
+Moves = Iterable[tuple[int, Cell]]
 BoardType = list[list[Cell]]
+
+
+@dataclass(frozen=True, repr=True)
+class GameMove:
+    player: Player
+    order: int
+    row: int
+    column: int
+    created_at: datetime
+
+
+@dataclass(frozen=True, repr=True)
+class XOGame:
+    id: int
+    user_id: int
+    size: int
+    winner: Optional[int]
+    created_at: datetime
+    finished_at: datetime
+
+
+GameMoves = Iterable[GameMove]

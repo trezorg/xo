@@ -4,13 +4,13 @@ __all__ = (
     'memoize',
 )
 
-CACHE: dict[tuple[str, int, bool], int] = {}
+CACHE: dict[tuple[str, bool], int] = {}
 
 
 def memoize(func):
 
     def _inner(board: Board, depth: int = 0, is_max: bool = False):
-        cache_key = str(board), depth, is_max
+        cache_key = str(board), is_max
         score = CACHE.get(cache_key)
         if score is not None:
             return score

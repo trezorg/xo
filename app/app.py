@@ -22,6 +22,7 @@ from .views import (
     handle_server_error,
     signin,
     signup,
+    start,
 )
 from .constant import (
     DEFAULT_POSTGRESQL_URI,
@@ -44,12 +45,19 @@ def create_app():
     postgresql_url = os.getenv('POSTGRESQL_URL', DEFAULT_POSTGRESQL_URI)
     jwt_expiration = os.getenv('JWT_EXPIRATION_DELTA', JWT_EXPIRATION_DELTA)
     engine = create_engine(postgresql_url, echo=True)
-    session = sessionmaker(bind=engine)
+    session = sessionmaker(bind=engine, expire_on_commit=False)
     app.config['session'] = session
     app.config['JWT_EXPIRATION_DELTA'] = timedelta(seconds=jwt_expiration)
-    app.config['swagger'] = Swagger(
-        app,
+    swagger = Swagger(
+        app=app,
         template={
+            "securityDefinitions": {
+                "APIKeyHeader": {
+                    "type": "apiKey",
+                    "name": "Authorization",
+                    "in": "header"
+                }
+            },
             "info": {
                 "title": "XO Swagger",
                 "version": "1.0",
@@ -63,14 +71,16 @@ def create_app():
         },
     )
 
+    app.config['swagger'] = swagger
     app.errorhandler(400)(handle_400_request)
     app.errorhandler(BadRequest)(handle_bad_request)
     app.errorhandler(500)(handle_server_error)
     app.errorhandler(404)(handle_404_error)
     app.route('/signup', methods=['POST'])(signup)
     app.route('/signin', methods=['POST'])(signin)
+    app.route('/start', methods=['POST'])(start)
 
     jwt = JWT(app, authenticate, identity)
     app.config['jwt'] = jwt
-    app.config['JWT_AUTH_HEADER_NAME'] = 'Bearer'
+    app.config['JWT_AUTH_HEADER_PREFIX'] = 'Bearer'
     return app
