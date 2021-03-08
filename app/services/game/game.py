@@ -75,7 +75,7 @@ def start_game(app: Flask, user: User, size: int = DEFAULT_GAME_SIZE) -> Tuple[X
     :param app: Flask. Flask application
     :param user: User. sqlalchemy user object
     :param size: int. board size
-    :return: (Game, GameMoves). Current game and board state: (XOGame, GameMoves)
+    :return: (XOGame, GameMoves). Current game and board state
     """
     ses = app.config['session']
     # find player to start game
@@ -109,7 +109,7 @@ def get_game(app: Flask, user: User, game_id: int) -> Tuple[XOGame, GameMoves]:
     :param app: Flask. Application
     :param game_id: int
     :param user: User
-    :return: (Game, GameMoves). Current game and board state: (XOGame, GameMoves)
+    :return: (XOGame, GameMoves). Current game and board state
     """
     ses = app.config['session']
     with session_scope(ses) as session:
@@ -136,8 +136,8 @@ def store_move(session: Session, game_id, position: int,
     :param game_id: int. Game ID
     :param position: int. Board position: row * size + column
     :param player: Player. Game player: [Player.computer, Player.player]
-    :param flush: bool. Either flush session
-    :param commit: bool. Either commit session
+    :param flush: bool. Flush session
+    :param commit: bool. Commit session
     :return:
     """
     last_order = session.query(func.max(Move.order)).filter(Move.game_id == game_id).scalar()
@@ -241,7 +241,7 @@ def get_games(app: Flask, user: User, page, size: int) -> tuple[XOGames, int]:
     """
     List of games for user
     :param app: Flask. Application
-    :param user_id: int
+    :param user: User
     :param page: int
     :param size: int
     :return: XOGames. List of games
