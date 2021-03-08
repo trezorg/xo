@@ -21,14 +21,17 @@ definitions:
             - size
             - total
         properties:
-            number:
+            page:
                 type: integer
                 minimum: 1
+                example: 1
             size:
                 type: integer
                 minimum: 1
+                example: 20
             total:
                 type: integer
+                example: 50
     PageGameResponse:
         type: object
         required:

@@ -7,6 +7,8 @@ def test_game_list_endpoint_default_pagination(client, games_url, db_game, auth_
     assert 'games' in payload, payload
     games = payload['games']
     assert len(games) == 1, payload
+    assert 'page' in payload, payload
+    assert payload['page']['page'] == 1, payload
 
 
 def test_game_list_endpoint_exceeded_pagination(client, games_url, db_game, auth_header):
