@@ -16,6 +16,7 @@ from .services.user.login import (
 )
 from .utils import random_string
 from .views import (
+    games,
     handle_400_request,
     handle_404_error,
     handle_exception_request,
@@ -49,7 +50,9 @@ def create_app():
     session = sessionmaker(bind=engine, expire_on_commit=False)
     app.config['session'] = session
     app.config['JWT_EXPIRATION_DELTA'] = timedelta(seconds=jwt_expiration)
-    swagger = Swagger(
+    app.config['SWAGGER'] = {}
+    app.config['SWAGGER']['openapi'] = '3.0.2'
+    Swagger(
         app=app,
         template={
             "securityDefinitions": {
@@ -72,7 +75,6 @@ def create_app():
         },
     )
 
-    app.config['swagger'] = swagger
     app.errorhandler(400)(handle_400_request)
     app.errorhandler(XOExceptions)(handle_exception_request)
     app.errorhandler(500)(handle_server_error)
@@ -81,6 +83,7 @@ def create_app():
     app.route('/signin', methods=['POST'])(signin)
     app.route('/start', methods=['POST'])(start)
     app.route('/move', methods=['POST'])(move)
+    app.route('/games', methods=['GET'])(games)
 
     jwt = JWT(app, authenticate, identity)
     app.config['jwt'] = jwt

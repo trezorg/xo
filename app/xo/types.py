@@ -1,4 +1,7 @@
-from dataclasses import dataclass
+from dataclasses import (
+    asdict,
+    dataclass,
+)
 from datetime import datetime
 from typing import (
     Iterable,
@@ -16,6 +19,7 @@ __all__ = (
     'GameMove',
     'GameMoves',
     'XOGame',
+    'XOGames',
     'Position',
 )
 
@@ -32,6 +36,9 @@ class GameMove:
     column: int
     created_at: datetime
 
+    def to_dict(self):
+        return asdict(self)
+
 
 @dataclass(frozen=True, repr=True)
 class XOGame:
@@ -42,5 +49,9 @@ class XOGame:
     created_at: datetime
     finished_at: datetime
 
+    def to_dict(self):
+        return asdict(self)
+
 
 GameMoves = Iterable[GameMove]
+XOGames = Iterable[XOGame]

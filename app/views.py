@@ -5,6 +5,7 @@ from flask import (
     g,
     jsonify,
     make_response,
+    request,
 )
 from flask_expects_json import expects_json
 from flask_jwt import (
@@ -17,8 +18,11 @@ from .schemas.validation import (
     auth_schema,
     start_game_schema,
     move_schema,
+    validate_page_query,
 )
 from .services.game.game import (
+    get_game,
+    get_games,
     make_move,
     start_game,
 )
@@ -109,8 +113,23 @@ def move():
     column = g.data['column']
     game_id = g.data['game_id']
     row, column = make_move(current_app, current_identity, game_id=game_id, row=row, column=column)
-    response = {
-        'row': row,
-        'column': column,
-    }
+    if row == -1:
+        # game finished
+        game, moves = get_game(current_app, current_identity, game_id=game_id)
+        response = game_board_response(game, moves)
+    else:
+        response = {
+            'row': row,
+            'column': column,
+        }
     return make_response(jsonify(response), 201)
+
+
+@jwt_required()
+@swag_from('swagger/games.yaml')
+def games():
+    page = validate_page_query(request.args)
+    page_games, total = get_games(current_app, current_identity, page=page['page'], size=page['size'])
+    page['total'] = total
+    resp = {'games': list(page_games), 'page': page}
+    return make_response(jsonify(resp), 200)

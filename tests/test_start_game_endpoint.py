@@ -64,7 +64,7 @@ def test_start_game(client, start_game_url, auth_header):
     )
     payload = response.json
     assert response.status_code == 201, data
-    assert 'game_id' in payload
+    assert 'id' in payload
     assert 'user_id' in payload
     assert 'moves' in payload
     assert payload['winner'] is None

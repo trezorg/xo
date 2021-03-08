@@ -83,6 +83,11 @@ def move_url():
 
 
 @pytest.fixture
+def games_url():
+    return url_for('games')
+
+
+@pytest.fixture
 def auth_header(db_user, app):
     jwt = app.config['jwt']
     access_token = jwt.jwt_encode_callback(db_user)

@@ -45,7 +45,7 @@ definitions:
                 example: Bad request
             description:
                 type: string
-                example: 'Row is over the board boundary'
+                example: 'Bad request'
     AuthError:
         type: object
         required:
@@ -77,37 +77,34 @@ definitions:
                 example: Server error
             description:
                 type: string
-                example: Cannot cre
-
+                example: Cannot process the request
 responses:
     201:
-        description: Game computer move
-        schema:
-            $ref: '#/definitions/MoveResponse'
-        examples:
-            row: 1
-            column: 1
+        description: Game computer move or game statistics when game has been finished
+        content:
+            application/json:
+                schema:
+                    oneOf:
+                        - $ref: '#/definitions/MoveResponse'
+                        - $ref: '#/definitions/GameResponse'
+                    example:
+                        row: 1
+                        column: 1
     400:
         description: Bad request
-        schema:
-            $ref: '#/definitions/Error'
-        examples:
-            status_code: 400
-            error: 'Bad request'
-            description: 'Row is over the board boundary'
+        content:
+            application/json:
+                schema:
+                    $ref: '#/definitions/Error'
     401:
         description: Authorization Required
-        schema:
-            $ref: '#/definitions/AuthError'
-        examples:
-            status_code: 401
-            error: 'Authorization Required'
-            description: 'Request does not contain an access token'
+        content:
+            application/json:
+                schema:
+                    $ref: '#/definitions/AuthError'
     500:
         description: Server error
-        schema:
-            $ref: '#/definitions/ServerError'
-        examples:
-            status_code: 500
-            error: 'Server error'
-            description: 'Cannot process the move'
+        content:
+            application/json:
+                schema:
+                    $ref: '#/definitions/ServerError'

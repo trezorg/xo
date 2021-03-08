@@ -33,6 +33,7 @@ from ...xo.types import (
     GameMoves,
     Position,
     XOGame,
+    XOGames,
 )
 from ...xo.xo import (
     find_important_cell_for_computer,
@@ -45,6 +46,9 @@ __all__ = (
     'start_game',
     'store_move',
     'get_moves',
+    'get_games',
+    'get_game',
+    'make_move',
     'delete_game',
     'strategy',
 )
@@ -71,7 +75,7 @@ def start_game(app: Flask, user: User, size: int = DEFAULT_GAME_SIZE) -> Tuple[X
     :param app: Flask. Flask application
     :param user: User. sqlalchemy user object
     :param size: int. board size
-    :return: (Game, GameMoves). Current game and board state: (Game, GameMoves)
+    :return: (Game, GameMoves). Current game and board state: (XOGame, GameMoves)
     """
     ses = app.config['session']
     # find player to start game
@@ -88,6 +92,31 @@ def start_game(app: Flask, user: User, size: int = DEFAULT_GAME_SIZE) -> Tuple[X
             position = row * size + column
             store_move(session, game_id=game.id, position=position, player=Player.computer)
         moves = get_moves(session, game_id=game.id, size=size)
+        board_game = XOGame(
+            id=game.id,
+            size=game.size,
+            winner=game.winner,
+            created_at=game.created_at,
+            finished_at=game.finished_at,
+            user_id=game.user_id,
+        )
+    return board_game, moves
+
+
+def get_game(app: Flask, user: User, game_id: int) -> Tuple[XOGame, GameMoves]:
+    """
+    Get game by id
+    :param app: Flask. Application
+    :param game_id: int
+    :param user: User
+    :return: (Game, GameMoves). Current game and board state: (XOGame, GameMoves)
+    """
+    ses = app.config['session']
+    with session_scope(ses) as session:
+        game = session.query(Game).filter(Game.user_id == user.id, Game.id == game_id).first()
+        if game is None:
+            raise BadRequest('You do not own this game')
+        moves = get_moves(session, game_id=game.id, size=game.size)
         board_game = XOGame(
             id=game.id,
             size=game.size,
@@ -141,6 +170,13 @@ def get_moves(session: Session, game_id, size: int) -> GameMoves:
         )
 
 
+def _finish_game(session: Session, game: Game, board: Board) -> tuple[int, int]:
+    game.winner = board.winner or None
+    game.finished_at = datetime.utcnow()
+    session.add(game)
+    return -1, -1
+
+
 def make_move(app: Flask, user: User, game_id, row, column: int) -> Tuple[int, int]:
     """
     Make player move
@@ -156,30 +192,32 @@ def make_move(app: Flask, user: User, game_id, row, column: int) -> Tuple[int, i
         game = session.query(Game).filter(Game.user_id == user.id, Game.id == game_id).first()
         if game is None:
             raise BadRequest('You do not own this game')
-        if row >= game.size:
+        if row >= game.size or row < 0:
             raise BadRequest('Row is over the board boundary')
-        if column >= game.size:
+        if column >= game.size or column < 0:
             raise BadRequest('Column is over the board boundary')
+
         moves = get_moves(session, game_id, game.size)
         board = Board.from_storage(game.size, moves)
+
         if board.is_over:
             raise GameIsOver('Game is over')
         if not board.is_free_cell(row, column):
             raise OccupiedCell()
-        store_move(session, game_id, row * game.size + column, Player.player)
+
+        position = row * game.size + column
+        store_move(session, game_id, position, Player.player)
         board.set(Cell(Player.player.value), row, column)
         if board.is_over:
-            game.winner = None if board.winner == Winner.none else board.winner
-            game.finished_at = datetime.utcnow()
-            session.add(game)
-            return -1, -1
+            return _finish_game(session, game, board)
+
         computer_move_row, computer_move_column = strategy(board)(board)
-        store_move(
-            session,
-            game_id,
-            computer_move_row * game.size + computer_move_column,
-            Player.computer,
-        )
+        board.set(Cell(Player.computer.value), computer_move_row, computer_move_column)
+        position = computer_move_row * game.size + computer_move_column
+        store_move(session, game_id, position, Player.computer)
+        if board.is_over:
+            return _finish_game(session, game, board)
+
         return computer_move_row, computer_move_column
 
 
@@ -197,3 +235,29 @@ def delete_game(app: Flask, game_id: int):
             session.commit()
         except SQLAlchemyError as err:
             raise BadRequest('Cannot delete game') from err
+
+
+def get_games(app: Flask, user: User, page, size: int) -> tuple[XOGames, int]:
+    """
+    List of games for user
+    :param app: Flask. Application
+    :param user_id: int
+    :param page: int
+    :param size: int
+    :return: XOGames. List of games
+    """
+    ses = app.config['session']
+    offset = (page - 1) * size
+    with session_scope(ses) as session:
+        games = session.query(Game).filter(Game.user_id == user.id).\
+            order_by(Game.created_at.desc()).offset(offset).limit(size)
+        total_games = session.query(Game).filter(Game.user_id == user.id).count()
+        it = (XOGame(
+            id=game.id,
+            user_id=user.id,
+            size=game.size,
+            winner=game.winner,
+            created_at=game.created_at,
+            finished_at=game.finished_at,
+        ) for game in games)
+        return it, total_games

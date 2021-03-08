@@ -1,34 +1,35 @@
 parameters:
-  - name: body
-    in: body
-    required: true
-    schema:
-        $ref: '#/definitions/StartGameBody'
+    - in: query
+      name: page
+      schema:
+        type: integer
+        minimum: 1
+      description: Page number
+    - in: query
+      name: size
+      schema:
+        type: integer
+        minimum: 1
+      description: Page size
 security:
     - APIKeyHeader: ['Authorization']
 definitions:
-    GameMove:
+    Page:
         type: object
         required:
-            - row
-            - column
-            - player
-            - order
-            - created_at
+            - page
+            - size
+            - total
         properties:
-            row:
+            number:
                 type: integer
-            column:
+                minimum: 1
+            size:
                 type: integer
-            player:
+                minimum: 1
+            total:
                 type: integer
-                enum: [1, 2]
-            order:
-                type: integer
-            created_at:
-                type: string
-                format: date-time
-    GameResponse:
+    PageGameResponse:
         type: object
         required:
             - game_id
@@ -37,7 +38,6 @@ definitions:
             - winner
             - created_at
             - finished_at
-            - moves
         properties:
             game_id:
                 type: integer
@@ -54,28 +54,25 @@ definitions:
             finished_at:
                 type: string
                 format: date-time
-            moves:
+    PageGamesResponse:
+        type: object
+        required:
+            - games
+            - page
+        properties:
+            page:
+                $ref: '#/definitions/Page'
+            games:
                 type: array
                 items:
-                    $ref: '#/definitions/GameMove'
-    StartGameBody:
-        type: object
-        id: StartGameBody
-        required:
-            - size
-        properties:
-            size:
-                type: int
-                example: 3
-                minimum: 3
-                maximum: 10
+                    $ref: '#/definitions/PageGameResponse'
 responses:
-    201:
-        description: Game info
+    200:
+        description: Games list
         content:
             application/json:
                 schema:
-                    $ref: '#/definitions/GameResponse'
+                    $ref: '#/definitions/PageGamesResponse'
     400:
         description: Bad request
         content:
