@@ -36,7 +36,7 @@ class Game(Base):
 
     id = Column(Integer, Sequence('game_id_seq'), primary_key=True)
     user_id = Column(Integer, ForeignKey('user.id', ondelete="CASCADE"), nullable=False)
-    created_at = Column(DateTime(timezone=True), default=func.now(), nullable=False)
+    created_at = Column(DateTime(timezone=True), default=func.now(), nullable=False, index=True)
     finished_at = Column(DateTime(timezone=True), nullable=True, default=None)
     winner = Column('winner', ENUM(Player, name='player_enum'), nullable=True)
     size = Column(Integer, nullable=False, default=DEFAULT_GAME_SIZE)
