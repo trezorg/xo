@@ -100,8 +100,8 @@ def signin():
 @swag_from('swagger/start.yaml')
 def start():
     size = g.data['size']
-    game, moves = start_game(current_app, current_identity, size)
-    response = game_board_response(game, moves)
+    xo_game, moves = start_game(current_app, current_identity, size)
+    response = game_board_response(xo_game, moves)
     return make_response(jsonify(response), 201)
 
 
@@ -115,8 +115,8 @@ def move():
     row, column = make_move(current_app, current_identity, game_id=game_id, row=row, column=column)
     if row == -1:
         # game finished
-        game, moves = get_game(current_app, current_identity, game_id=game_id)
-        response = game_board_response(game, moves)
+        xo_game, moves = get_game(current_app, current_identity, game_id=game_id)
+        response = game_board_response(xo_game, moves)
     else:
         response = {
             'row': row,
@@ -132,4 +132,12 @@ def games():
     page_games, total = get_games(current_app, current_identity, page=page['page'], size=page['size'])
     page['total'] = total
     resp = {'games': list(page_games), 'page': page}
+    return make_response(jsonify(resp), 200)
+
+
+@jwt_required()
+@swag_from('swagger/game.yaml')
+def game(game_id: int):
+    xo_game, moves = get_game(current_app, current_identity, game_id=game_id)
+    resp = game_board_response(xo_game, moves)
     return make_response(jsonify(resp), 200)

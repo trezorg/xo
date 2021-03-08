@@ -88,6 +88,12 @@ def games_url():
 
 
 @pytest.fixture
+def game_url(db_game):
+    game, _ = db_game
+    return url_for('game', game_id=game.id)
+
+
+@pytest.fixture
 def auth_header(db_user, app):
     jwt = app.config['jwt']
     access_token = jwt.jwt_encode_callback(db_user)

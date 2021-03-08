@@ -16,6 +16,7 @@ from .services.user.login import (
 )
 from .utils import random_string
 from .views import (
+    game,
     games,
     handle_400_request,
     handle_404_error,
@@ -84,6 +85,7 @@ def create_app():
     app.route('/start', methods=['POST'])(start)
     app.route('/move', methods=['POST'])(move)
     app.route('/games', methods=['GET'])(games)
+    app.route('/game/<int:game_id>', methods=['GET'])(game)
 
     jwt = JWT(app, authenticate, identity)
     app.config['jwt'] = jwt

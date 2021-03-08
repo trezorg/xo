@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 from ...constant import DEFAULT_GAME_SIZE
 from ...exceptions import (
     BadRequest,
+    Forbidden,
     OccupiedCell,
     GameIsOver,
 )
@@ -25,7 +26,6 @@ from ...models.session import session_scope
 from ...xo.enum import (
     Cell,
     Player,
-    Winner,
 )
 from ...xo.board import Board
 from ...xo.types import (
@@ -115,7 +115,7 @@ def get_game(app: Flask, user: User, game_id: int) -> Tuple[XOGame, GameMoves]:
     with session_scope(ses) as session:
         game = session.query(Game).filter(Game.user_id == user.id, Game.id == game_id).first()
         if game is None:
-            raise BadRequest('You do not own this game')
+            raise Forbidden('You do not own this game')
         moves = get_moves(session, game_id=game.id, size=game.size)
         board_game = XOGame(
             id=game.id,

@@ -4,7 +4,8 @@ __all__ = (
     'ServerError',
     'GameIsOver',
     'OccupiedCell',
-    'XOExceptions'
+    'XOExceptions',
+    'Forbidden',
 )
 
 
@@ -34,6 +35,12 @@ class BadRequest(XOExceptions):
 
     status_code = 400
     message = 'Bad request'
+
+
+class Forbidden(XOExceptions):
+
+    status_code = 403
+    message = 'Forbidden'
 
 
 class ServerError(XOExceptions):
