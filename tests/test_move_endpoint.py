@@ -2,7 +2,10 @@ import json
 
 from app.services.game.game import store_move
 from app.xo.board import Board
-from app.xo.enum import Player
+from app.xo.enum import (
+    Player,
+    Winner,
+)
 from app.xo.types import GameMove
 
 default_data = {
@@ -144,6 +147,7 @@ def test_moves_till_game_finished(client, move_url, db_game, auth_header):
         if 'moves' in payload:
             # game finished
             assert payload['finished_at']
+            assert payload['winner'] in Winner.values()
             json_moves = payload['moves']
             moves = [GameMove(**move) for move in json_moves]
             board = Board.from_storage(size, moves)

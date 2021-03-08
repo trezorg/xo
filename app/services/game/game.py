@@ -59,7 +59,8 @@ MINIMAX_MIN_FREE_CELLS = 9
 def strategy(board: Board, player: Player = Player.computer) -> Callable[[Board], Position]:
     """
     Strategy chooses function to calculate next move.
-    Until we have more than 9 free cells we will use random choice
+    Until we have more than 9 free cells we will use custom function with random choice fallback
+    We use the minimax algorithm in case we have 9 and less free cells
     :param player: Player. Player for this turn
     :param board: Board. Game board
     :return: Function to calculate next move
@@ -140,8 +141,7 @@ def store_move(session: Session, game_id, position: int,
     :param commit: bool. Commit session
     :return:
     """
-    last_order = session.query(func.max(Move.order)).filter(Move.game_id == game_id).scalar()
-    last_order = 1 if not last_order else last_order + 1
+    last_order = session.query(func.coalesce(func.max(Move.order), 1)).filter(Move.game_id == game_id).scalar()
     move = Move(game_id=game_id, position=position, player=player.value, order=last_order)
     session.add(move)
     if flush:
