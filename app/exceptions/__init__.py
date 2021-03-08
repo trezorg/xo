@@ -4,6 +4,7 @@ __all__ = (
     'ServerError',
     'GameIsOver',
     'OccupiedCell',
+    'XOExceptions'
 )
 
 

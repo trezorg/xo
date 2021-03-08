@@ -45,7 +45,7 @@ def create_app():
     app.debug = debug
     postgresql_url = os.getenv('POSTGRESQL_URL', DEFAULT_POSTGRESQL_URI)
     jwt_expiration = os.getenv('JWT_EXPIRATION_DELTA', JWT_EXPIRATION_DELTA)
-    engine = create_engine(postgresql_url, echo=True)
+    engine = create_engine(postgresql_url, echo=False)
     session = sessionmaker(bind=engine, expire_on_commit=False)
     app.config['session'] = session
     app.config['JWT_EXPIRATION_DELTA'] = timedelta(seconds=jwt_expiration)

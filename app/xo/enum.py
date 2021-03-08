@@ -14,6 +14,7 @@ __all__ = (
     'Winner',
     'Player',
     'Cell',
+    'Diagonal',
 )
 
 
@@ -54,6 +55,10 @@ class Cell(BaseEnum, IntEnum):
             return 'x'
         return '0'
 
+    @property
+    def is_none(self):
+        return self == Cell.none
+
 
 class Winner(BaseEnum, IntEnum):
 
@@ -75,3 +80,29 @@ class Player(BaseEnum, IntEnum):
 
     player = 1
     computer = 2
+
+    @property
+    def opponent(self) -> 'Player':
+        return Player.computer if self == Player.player else Player.player
+
+    @property
+    def is_computer(self):
+        return self == Player.computer
+
+    @property
+    def is_player(self):
+        return self == Player.player
+
+
+class Diagonal(BaseEnum, IntEnum):
+
+    left = 1
+    right = 2
+
+    @property
+    def is_left(self):
+        return self == Diagonal.left
+
+    @property
+    def is_right(self):
+        return self == Diagonal.right

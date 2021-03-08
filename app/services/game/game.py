@@ -31,11 +31,14 @@ from ...xo.board import Board
 from ...xo.types import (
     GameMove,
     GameMoves,
+    Position,
     XOGame,
 )
 from ...xo.xo import (
+    find_important_cell_for_computer,
+    find_important_cell_for_player,
     find_minimax_computer_move,
-    find_random_move,
+    find_minimax_player_move,
 )
 
 __all__ = (
@@ -43,21 +46,23 @@ __all__ = (
     'store_move',
     'get_moves',
     'delete_game',
+    'strategy',
 )
 
 MINIMAX_MIN_FREE_CELLS = 9
 
 
-def strategy(board: Board) -> Callable[[Board], tuple[int, int]]:
+def strategy(board: Board, player: Player = Player.computer) -> Callable[[Board], Position]:
     """
     Strategy chooses function to calculate next move.
     Until we have more than 9 free cells we will use random choice
+    :param player: Player. Player for this turn
     :param board: Board. Game board
     :return: Function to calculate next move
     """
     if board.free_positions_count > MINIMAX_MIN_FREE_CELLS:
-        return find_random_move
-    return find_minimax_computer_move
+        return find_important_cell_for_computer if player.is_computer else find_important_cell_for_player
+    return find_minimax_computer_move if player.is_computer else find_minimax_player_move
 
 
 def start_game(app: Flask, user: User, size: int = DEFAULT_GAME_SIZE) -> Tuple[XOGame, GameMoves]:
@@ -71,14 +76,15 @@ def start_game(app: Flask, user: User, size: int = DEFAULT_GAME_SIZE) -> Tuple[X
     ses = app.config['session']
     # find player to start game
     start_player = random.choice(list(Player))
-    board = Board(size=size)
     computer_started = start_player == Player.computer
     with session_scope(ses) as session:
         game = Game(user_id=user.id, size=size)
         session.add(game)
         session.flush()
         if computer_started:
-            row, column = strategy(board)(board)
+            # put right to the center of the board for the first turn
+            center = size // 2
+            row, column = center, center
             position = row * size + column
             store_move(session, game_id=game.id, position=position, player=Player.computer)
         moves = get_moves(session, game_id=game.id, size=size)
@@ -126,7 +132,6 @@ def get_moves(session: Session, game_id, size: int) -> GameMoves:
     moves = session.query(Move).filter(Move.game_id == game_id).order_by(Move.order)
     for move in moves:
         row, column = divmod(move.position, size)
-        print(row, column, move.position)
         yield GameMove(
             player=Player(move.player),
             order=move.order,
@@ -144,7 +149,7 @@ def make_move(app: Flask, user: User, game_id, row, column: int) -> Tuple[int, i
     :param game_id: int. Game_id
     :param row: int. Board row
     :param column: int. Board column
-    :return: tuple[int, int]. Computer turn
+    :return: Position. Computer turn
     """
     ses = app.config['session']
     with session_scope(ses) as session:

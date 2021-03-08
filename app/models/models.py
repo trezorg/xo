@@ -43,6 +43,10 @@ class Game(Base):
     user = relationship("User", back_populates="games")
     moves = relationship("Move", back_populates="game")
 
+    @property
+    def is_over(self):
+        return self.finished_at is not None
+
 
 class Move(Base):
 

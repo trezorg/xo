@@ -13,6 +13,7 @@ from .types import (
     BoardType,
     GameMoves,
     Moves,
+    Position,
 )
 
 
@@ -76,7 +77,7 @@ class Board:
         return count
 
     @property
-    def free_positions(self) -> Iterator[tuple[int, int]]:
+    def free_positions(self) -> Iterator[Position]:
         """
         Return iterator over blank board cell positions
         :return: Iterator of blank cells

@@ -16,10 +16,12 @@ __all__ = (
     'GameMove',
     'GameMoves',
     'XOGame',
+    'Position',
 )
 
 Moves = Iterable[tuple[int, Cell]]
 BoardType = list[list[Cell]]
+Position = tuple[int, int]
 
 
 @dataclass(frozen=True, repr=True)
