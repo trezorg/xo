@@ -35,8 +35,7 @@ ADD . ${PROJECT_PATH}
 RUN echo "System commands..." && \
     cd ${PROJECT_PATH} && \
     [ "${WITH_DEV_PACKAGES}" != "yes" ] && rm -rf tests || true && \
-    chown -R ${USER}:${USER} ${PROJECT_PATH} && \
-    find . -iname "*.pyc" -delete
+    chown -R ${USER}:${USER} ${PROJECT_PATH}
 
 USER ${USER_ID}
 EXPOSE ${APP_PORT}

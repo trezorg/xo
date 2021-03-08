@@ -3,5 +3,9 @@
 .mypy_cache
 .pytest_cache
 .dockerignore
+.gitignore
 docker-compose*
 .coverage
+*.pyc
+.env
+Dockerfile
