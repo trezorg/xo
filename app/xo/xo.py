@@ -329,7 +329,7 @@ def find_important_diagonal_cells(board: Board,
             continue
         diagonal_dict[cell] += 1
 
-    # if both players made turns on this column it never wins
+    # if both players made turns on this diagonal it never wins
     if len(diagonal_dict) == 1:
         for cell, number in diagonal_dict.items():
             items.append((Player(cell.value), number, Diagonal.left))
@@ -348,7 +348,7 @@ def find_important_diagonal_cells(board: Board,
         row += 1
         column -= 1
 
-    # if both players made turns on this column it never wins
+    # if both players made turns on this diagonal it never wins
     if len(diagonal_dict) == 1:
         for cell, number in diagonal_dict.items():
             items.append((Player(cell.value), number, Diagonal.right))
@@ -389,7 +389,7 @@ def find_important_cell(board: Board, player: Player, defencive: bool = True) ->
             if len(new_pair) > crossing:
                 pair = new_pair
 
-    if pair is not None:
+    if pair:
         return pair.pop()
 
     # return some direction that most populated. Either rows, columns or diagonals
